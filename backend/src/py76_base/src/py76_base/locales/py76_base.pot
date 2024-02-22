@@ -4,7 +4,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2022-05-25 17:12+0000\n"
+"POT-Creation-Date: 2024-02-22 21:35+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI +ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,3 +16,27 @@ msgstr ""
 "Language-Name: English\n"
 "Preferred-Encodings: utf-8 latin1\n"
 "Domain: py76_base\n"
+
+#: py76_base/src/py76_base/profiles.zcml:22
+msgid "Initial content for our website."
+msgstr ""
+
+#: py76_base/src/py76_base/profiles.zcml:13
+msgid "Policy package to install our site"
+msgstr ""
+
+#: py76_base/src/py76_base/profiles.zcml:22
+msgid "Py76 Base: Initial content"
+msgstr ""
+
+#: py76_base/src/py76_base/profiles.zcml:13
+msgid "Py76 Base: Install"
+msgstr ""
+
+#: py76_base/src/py76_base/profiles.zcml:30
+msgid "Py76 Base: Uninstall"
+msgstr ""
+
+#: py76_base/src/py76_base/profiles.zcml:30
+msgid "Uninstall Py76 Base setup."
+msgstr ""

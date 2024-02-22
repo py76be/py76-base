@@ -1,0 +1,19 @@
+{
+  "portal": [
+    {
+      "email": "maurits@py76.be",
+      "properties": {
+        "fullname": "Py76 Base",
+        "location": "World"
+      },
+      "groups": [
+      ],
+      "roles": [
+        "Member"
+      ],
+      "username": "py76-base"
+    }
+  ],
+    "team": [
+  ]
+}

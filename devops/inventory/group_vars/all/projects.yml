@@ -1,0 +1,7 @@
+---
+project_folders:
+  # Path to store demo.py76.be postgres data
+  - path: "/srv/py76-base/data"
+    owner: 999
+    group: 999
+    mode: "0750"

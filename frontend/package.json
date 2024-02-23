@@ -29,6 +29,8 @@
     "src/addons/volto-py76-base"
   ],
   "addons": [
+    "volto-form-block",
+    "volto-subblocks",
     "volto-py76-base"
   ],
   "jest": {

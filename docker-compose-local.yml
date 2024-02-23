@@ -1,0 +1,30 @@
+services:
+
+  frontend:
+    build: frontend
+    environment:
+      RAZZLE_INTERNAL_API_PATH: http://backend:8080/Plone
+    ports:
+    - "3000:3000"
+    depends_on:
+      - backend
+
+  backend:
+    build: backend
+    environment:
+      SITE: Plone
+      ZEO_ADDRESS: zeo:8100
+    ports:
+    - "8080:8080"
+    depends_on:
+      - zeo
+
+  zeo:
+    image: plone/plone-zeo:latest
+    volumes:
+      - ./data:/data
+    ports:
+    - "8100:8100"
+
+volumes:
+  data: {}

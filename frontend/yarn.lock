@@ -14324,7 +14324,7 @@ __metadata:
     ts-jest: ^26.4.2
     ts-loader: 9.4.4
     typescript: 5.2.2
-    volto-form-block: 3.7.1
+    volto-form-block: 3.3.1
     volto-subblocks: 2.0.0
   languageName: unknown
   linkType: soft
@@ -27899,9 +27899,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"volto-form-block@npm:3.7.1":
-  version: 3.7.1
-  resolution: "volto-form-block@npm:3.7.1"
+"volto-form-block@npm:3.3.1":
+  version: 3.3.1
+  resolution: "volto-form-block@npm:3.3.1"
   dependencies:
     "@hcaptcha/react-hcaptcha": ^0.3.6
     file-saver: ^2.0.5
@@ -27910,7 +27910,7 @@ __metadata:
   peerDependencies:
     "@plone/volto": ">=16.0.0-alpha.38"
     volto-subblocks: ^2.0.0
-  checksum: 6cdbcb91d5bca43fa4ee828e7816df37573816854552fd00965053dd7f2496c8ee4c87838cbaa9d5e10b5496b51da1ed573ff3c300806f8d7a2e0ad55a8ca962
+  checksum: 8bd22321126b19e5fccaff8f7783b42f83f7d4cc175d821bfe247c21bc9afcd52c9f301bc7b17ab1dbab0907748cd85e8897d3311ff30a50f84b2ebcc2465581
   languageName: node
   linkType: hard
 

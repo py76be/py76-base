@@ -1,2 +1,3 @@
 -c https://dist.plone.org/release/6.0.10.1/constraints.txt
 collective.volto.formsupport==2.7.0
+collective.honeypot==2.1

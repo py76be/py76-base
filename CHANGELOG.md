@@ -14,6 +14,10 @@
   Default to English in `create_site.py` and in the Volto settings.
   Volto now supports English, Dutch, German and French.
 
+- Switch the UI to the base language when visiting content in an unsupported
+  regional variant, for example English for `en-gb` content.
+  Volto only does this when doing server side rendering.
+
 
 ## 1.0.0 (2024-02-22)
 

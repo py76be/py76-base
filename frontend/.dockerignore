@@ -1,8 +1,8 @@
-.yarn/cache
 *.log
 build
 cache
+core
 cypress
 Dockerfile
 node_modules
-omelette
+packages/**/node_modules

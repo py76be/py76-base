@@ -1,5 +1,10 @@
 {
-  "volto-py76-base": {
-    "local": "addons/volto-py76-base/src"
+  "core": {
+    "output": "./",
+    "package": "@plone/volto",
+    "url": "git@github.com:plone/volto.git",
+    "https": "https://github.com/plone/volto.git",
+    "tag": "19.7.1",
+    "filterBlobs": true
   }
 }

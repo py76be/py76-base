@@ -2,101 +2,137 @@
 #     https://tech.davis-hansson.com/p/make/
 SHELL:=bash
 .ONESHELL:
-.SHELLFLAGS:=-xeu -o pipefail -O inherit_errexit -c
+.SHELLFLAGS:=-eu -o pipefail -c
 .SILENT:
 .DELETE_ON_ERROR:
 MAKEFLAGS+=--warn-undefined-variables
 MAKEFLAGS+=--no-builtin-rules
+
+CURRENT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+
+# We like colors
+# From: https://coderwall.com/p/izxssa/colored-makefile-for-golang-projects
+RED=`tput setaf 1`
+GREEN=`tput setaf 2`
+RESET=`tput sgr0`
+YELLOW=`tput setaf 3`
+
+# Keep this in sync with the tag in mrs.developer.json.
+VOLTO_VERSION=19.7.1
+PLONE_VERSION=6
+DOCKER_IMAGE=plone/server-dev:${PLONE_VERSION}
+DOCKER_IMAGE_ACCEPTANCE=plone/server-acceptance:${PLONE_VERSION}
+
+ADDON_NAME=volto-py76-base
 IMAGE_NAME=ghcr.io/py76be/py76-base-frontend
 IMAGE_TAG=latest
 
-NODEBIN = ./node_modules/.bin
-
-# Add the following 'help' target to your Makefile
-# And add help text after each target name starting with '\#\#'
 .PHONY: help
 help: ## This help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
+# Dev Helpers
+
 .PHONY: clean
-clean: ## Clean installation
-	@echo "Clean installation"
-	rm -Rf node_modules
-
-.PHONY: build
-build: install ## Build the frontend
-	@echo "Build Frontend"
-	yarn build
-
-.PHONY: start
-start: ## Start Frontend
-	yarn start
-
-.PHONY: format-prettier
-format-prettier: ## Format Code with Prettier
-	yarn run prettier:fix
-
-.PHONY: format-stylelint
-format-stylelint: ## Format Code with Stylelint
-	yarn run stylelint:fix
-
-.PHONY: format-lint
-format-lint: ## Format Code with Lint
-	yarn run lint:fix
-
-.PHONY: format
-format: format-prettier format-lint format-stylelint ## Format the codebase according to our standards
+clean: ## Clean environment
+	@echo "$(RED)==> Cleaning Volto core and node_modules$(RESET)"
+	rm -rf core node_modules packages/*/node_modules
 
 .PHONY: install
-install: ## Install the frontend
-	@echo "Install frontend"
-	$(MAKE) omelette
-	$(MAKE) preinstall
-	yarn install
+install: ## Install the frontend: check out Volto core and install packages
+	@echo "$(GREEN)==> Install frontend$(RESET)"
+	pnpm dlx mrs-developer missdev --no-config --fetch-https
+	pnpm i
+	$(MAKE) build-deps
 
-.PHONY: preinstall
-preinstall: ## Preinstall task, checks if missdev (mrs-developer) is present and runs it
-	if [ -f $$(pwd)/mrs.developer.json ]; then make develop; fi
+.PHONY: start
+start: ## Start the frontend in development mode
+	pnpm start
 
-.PHONY: develop
-develop: ## Runs missdev in the local project (mrs.developer.json should be present)
-	if [ -f $$(pwd)/tsconfig.json ]; then npx -p mrs-developer missdev --config=tsconfig.json --output=addons --fetch-https; else  npx -p mrs-developer missdev --config=jsconfig.json --output=addons --fetch-https;fi
+.PHONY: build
+build: ## Build a production bundle
+	pnpm build
 
-.PHONY: omelette
-omelette: ## Creates the omelette folder that contains a link to the installed version of Volto (a softlink pointing to node_modules/@plone/volto)
-	if [ ! -d omelette ]; then ln -sf node_modules/@plone/volto omelette; fi
+.PHONY: start-prod
+start-prod: ## Start the production bundle
+	pnpm start:prod
 
-.PHONY: patches
-patches:
-	/bin/bash patches/patchit.sh > /dev/null 2>&1 ||true
+core/packages/registry/dist: $(shell find core/packages/registry/src -type f 2>/dev/null)
+	pnpm --filter @plone/registry build
+
+core/packages/components/dist: $(shell find core/packages/components/src -type f 2>/dev/null)
+	pnpm --filter @plone/components build
+
+.PHONY: build-deps
+build-deps: core/packages/registry/dist core/packages/components/dist ## Build dependencies
 
 .PHONY: i18n
 i18n: ## Sync i18n
-	yarn i18n
+	pnpm --filter $(ADDON_NAME) i18n
 
 .PHONY: i18n-ci
 i18n-ci: ## Check if i18n is not synced
-	yarn i18n && git diff -G'^[^\"POT]' --exit-code
+	pnpm --filter $(ADDON_NAME) i18n && git diff -G'^[^\"POT]' --exit-code
 
+.PHONY: format
+format: ## Format the codebase according to our standards
+	pnpm prettier:fix
+	pnpm lint:fix
+	pnpm stylelint:fix
+
+.PHONY: lint
+lint: ## Lint, or catch and remove problems, in code base
+	pnpm lint
+	pnpm prettier
+	pnpm stylelint
 
 .PHONY: test
-test: ## Run tests
-	CI=true yarn test
+test: ## Run unit tests
+	pnpm test
 
+.PHONY: ci-test
+ci-test: ## Run unit tests in CI
+	# Unit Tests need the i18n to be built
+	VOLTOCONFIG=$(CURRENT_DIR)/volto.config.js pnpm --filter @plone/volto i18n
+	CI=1 pnpm test --run
+
+.PHONY: backend-docker-start
+backend-docker-start: ## Start a Docker-based backend for development
+	@echo "$(GREEN)==> Start Docker-based Plone Backend$(RESET)"
+	docker run -it --rm --name=backend -p 8080:8080 -e SITE=Plone $(DOCKER_IMAGE)
+
+## Storybook
 .PHONY: storybook
-storybook: ## Generate Storybook
-	yarn storybook
+storybook: ## Start Storybook server on port 6006
+	pnpm run storybook
 
+.PHONY: storybook-build
+storybook-build: ## Build Storybook
+	mkdir -p $(CURRENT_DIR)/.storybook-build
+	pnpm run storybook-build -o $(CURRENT_DIR)/.storybook-build
+
+## Docker
 .PHONY: build-image
-build-image:  ## Build Docker Image
-	@DOCKER_BUILDKIT=1 docker build . -t $(IMAGE_NAME):$(IMAGE_TAG) -f Dockerfile
+build-image: ## Build Docker Image
+	@DOCKER_BUILDKIT=1 docker build . -t $(IMAGE_NAME):$(IMAGE_TAG) -f Dockerfile --build-arg VOLTO_VERSION=$(VOLTO_VERSION)
 
-# Acceptance tests
+## Acceptance
+.PHONY: acceptance-frontend-dev-start
+acceptance-frontend-dev-start: ## Start acceptance frontend in development mode
+	RAZZLE_API_PATH=http://127.0.0.1:55001/plone pnpm start
+
+.PHONY: acceptance-frontend-prod-start
+acceptance-frontend-prod-start: ## Start acceptance frontend in production mode
+	RAZZLE_API_PATH=http://127.0.0.1:55001/plone pnpm build && pnpm start:prod
+
+.PHONY: acceptance-backend-start
+acceptance-backend-start: ## Start backend acceptance server
+	docker run -it --rm -p 55001:55001 $(DOCKER_IMAGE_ACCEPTANCE)
 
 .PHONY: test-acceptance
-test-acceptance: ## Start Core Cypress Acceptance Tests
-	NODE_ENV=production CYPRESS_API=plone $(NODEBIN)/cypress open
+test-acceptance: ## Start Cypress in interactive mode
+	pnpm --filter @plone/volto exec cypress open --config-file $(CURRENT_DIR)/cypress.config.js --config specPattern=$(CURRENT_DIR)'/cypress/tests/**/*.{js,jsx,ts,tsx}'
 
 .PHONY: test-acceptance-headless
-test-acceptance-headless: ## Start Core Cypress Acceptance Tests in headless mode
-	NODE_ENV=production CYPRESS_API=plone $(NODEBIN)/cypress run
+test-acceptance-headless: ## Run Cypress tests in headless mode
+	pnpm --filter @plone/volto exec cypress run --config-file $(CURRENT_DIR)/cypress.config.js --config specPattern=$(CURRENT_DIR)'/cypress/tests/**/*.{js,jsx,ts,tsx}'

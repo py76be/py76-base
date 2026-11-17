@@ -1,3 +1,4 @@
-src/**/CHANGELOG.md
-src/**/README.md
-!src/addons/volto-py76-base
+.storybook
+core
+CHANGELOG.md
+README.md

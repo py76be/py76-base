@@ -9,7 +9,6 @@ from zope.interface import directlyProvides
 import os
 import transaction
 
-
 truthy = frozenset(("t", "true", "y", "yes", "on", "1"))
 
 
@@ -50,7 +49,7 @@ payload = {
         "py76_base:initial",
     ],
     "setup_content": False,
-    "default_language": "nl",
+    "default_language": "en",
     "portal_timezone": "Europe/Brussels",
 }
 

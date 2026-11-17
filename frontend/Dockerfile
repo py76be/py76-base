@@ -1,62 +1,38 @@
 # syntax=docker/dockerfile:1
-FROM node:18-slim as base
-FROM base as builder
+ARG VOLTO_VERSION=19.7.1
+FROM plone/frontend-builder:${VOLTO_VERSION} AS builder
 
-RUN <<EOT
+COPY --chown=node packages/volto-py76-base /app/packages/volto-py76-base
+COPY --chown=node volto.config.js /app/
+COPY --chown=node package.json /app/package.json.temp
+COPY --chown=node mrs.developer.json /app/
+COPY --chown=node pnpm-workspace.yaml /app/
+COPY --chown=node pnpm-lock.yaml /app/pnpm-lock.yaml
+
+RUN --mount=type=cache,id=pnpm,target=/app/.pnpm-store,uid=1000 <<EOT
     set -e
-    apt update
-    apt install -y --no-install-recommends python3 build-essential
-    mkdir /app
-    chown -R node:node /app
-    rm -rf /var/lib/apt/lists/*
+    python3 -c "import json; orig_data = json.load(open('package.json.temp')); orig_deps = orig_data['dependencies']; data = json.load(open('package.json')); data['dependencies'].update(orig_deps); json.dump(data, open('package.json', 'w'), indent=2)"
+    rm package.json.temp
+    pnpm dlx mrs-developer missdev --no-config --fetch-https
+    pnpm install && pnpm build:deps
+    pnpm build
+    # This is necessary because the build is trying to recreate the node_modules folder
+    # by telling it to CI=1 it will just recreate them
+    CI=1 pnpm install --prod
 EOT
 
-COPY --chown=node . /build/
-RUN corepack enable
-
-USER node
-WORKDIR /build
-RUN <<EOT
-    set -e
-    make install
-    yarn build
-EOT
-
-FROM base
+FROM plone/frontend-prod-config:${VOLTO_VERSION}
 
 LABEL maintainer="Maurits van Rees <maurits@py76.be>" \
       org.label-schema.name="py76-base-frontend" \
       org.label-schema.description="Py76 Base frontend image." \
       org.label-schema.vendor="Maurits van Rees"
 
-# Install busybox and wget
+COPY --from=builder /app/ /app/
+
 RUN <<EOT
     set -e
-    apt update
-    apt install -y --no-install-recommends busybox wget
-    busybox --install -s
-    rm -rf /var/lib/apt/lists/*
-    mkdir /app
-    chown -R node:node /app
+    CI=1 npm i -g corepack@latest && corepack enable pnpm
+    CI=1 corepack use pnpm@10.20.0
+    CI=1 corepack prepare pnpm@10.20.0 --activate
 EOT
-
-# Run the image with user node
-USER node
-
-# Copy
-COPY --from=builder /build/ /app/
-
-# Set working directory to /app
-WORKDIR /app
-
-# Expose default Express port
-EXPOSE 3000
-
-# Set healthcheck to port 3000
-HEALTHCHECK --interval=10s --timeout=5s --start-period=30s CMD [ -n "$LISTEN_PORT" ] || LISTEN_PORT=3000 ; wget -q http://127.0.0.1:"$LISTEN_PORT" -O - || exit 1
-
-# Entrypoint would be yarn
-ENTRYPOINT [ "yarn" ]
-
-# And the image will run in production mode
-CMD ["start:prod"]

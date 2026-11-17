@@ -36,6 +36,8 @@ report.html
 reports/
 venv/
 *-mxdev.txt
+.mxdev_cache/
+.flakeheaven_cache/
 # excludes
 live.cfg
 inituser

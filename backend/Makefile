@@ -32,7 +32,9 @@ IMAGE_NAME=ghcr.io/py76be/py76-base-backend
 IMAGE_TAG=latest
 
 # Python checks
-PYTHON?=python3
+# Default to Python 3.13 to match the Python from the upstream
+# plone/server-builder Docker image.
+PYTHON?=python3.13
 
 # installed?
 ifeq (, $(shell which $(PYTHON) ))
@@ -40,11 +42,15 @@ ifeq (, $(shell which $(PYTHON) ))
 endif
 
 # version ok?
-PYTHON_VERSION_MIN=3.8
+PYTHON_VERSION_MIN=3.11
 PYTHON_VERSION_OK=$(shell $(PYTHON) -c "import sys; print((int(sys.version_info[0]), int(sys.version_info[1])) >= tuple(map(int, '$(PYTHON_VERSION_MIN)'.split('.'))))")
 ifeq ($(PYTHON_VERSION_OK),0)
-  $(error "Need python $(PYTHON_VERSION) >= $(PYTHON_VERSION_MIN)")
+  $(error "Need python >= $(PYTHON_VERSION_MIN)")
 endif
+
+# Since Python 3.13, venv creates a .gitignore file in the venv directory,
+# which would overwrite our own .gitignore, so we turn that off.
+VENV_OPTIONS=$(shell $(PYTHON) -c "import sys; print('--without-scm-ignore-files' if sys.version_info >= (3, 13) else '')")
 
 
 # Add the following 'help' target to your Makefile
@@ -86,7 +92,7 @@ clean-test: ## remove test and coverage artifacts
 
 bin/pip:
 	@echo "$(GREEN)==> Setup Virtual Env$(RESET)"
-	$(PYTHON) -m venv .
+	$(PYTHON) -m venv $(VENV_OPTIONS) .
 	bin/pip install -U "pip" "wheel" "cookiecutter" "mxdev"
 
 .PHONY: config
@@ -107,8 +113,8 @@ i18n: bin/i18ndude ## Update locales
 # TODO `make build`
 # build:
 
-.PHONY: build-dev
-build-dev: config ## pip install Plone packages
+.PHONY: install
+install: config ## Create virtualenv and pip install Plone packages
 	@echo "$(GREEN)==> Setup Build$(RESET)"
 	bin/mxdev -c mx.ini
 	bin/pip install -r requirements-mxdev.txt

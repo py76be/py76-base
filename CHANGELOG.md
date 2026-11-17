@@ -9,6 +9,11 @@
   which no longer sets up the content types, for example the
   `plone.constraintypes` behavior on Document.
 
+- Respect the language chosen when creating a site: the `py76_base:default`
+  profile no longer sets the default and available languages.
+  Default to English in `create_site.py` and in the Volto settings.
+  Volto now supports English, Dutch, German and French.
+
 
 ## 1.0.0 (2024-02-22)
 

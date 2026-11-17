@@ -49,7 +49,7 @@ payload = {
         "py76_base:initial",
     ],
     "setup_content": False,
-    "default_language": "nl",
+    "default_language": "en",
     "portal_timezone": "Europe/Brussels",
 }
 

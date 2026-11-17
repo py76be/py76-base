@@ -3,7 +3,7 @@
 addopts = "--cov-report term --cov=py76_base"
 [tool.black]
 line-length = 88
-target-version = ['py310']
+target-version = ['py311']
 include = '\.pyi?$'
 exclude = '''
 (

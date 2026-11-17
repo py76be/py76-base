@@ -42,11 +42,15 @@ ifeq (, $(shell which $(PYTHON) ))
 endif
 
 # version ok?
-PYTHON_VERSION_MIN=3.10
+PYTHON_VERSION_MIN=3.11
 PYTHON_VERSION_OK=$(shell $(PYTHON) -c "import sys; print((int(sys.version_info[0]), int(sys.version_info[1])) >= tuple(map(int, '$(PYTHON_VERSION_MIN)'.split('.'))))")
 ifeq ($(PYTHON_VERSION_OK),0)
   $(error "Need python >= $(PYTHON_VERSION_MIN)")
 endif
+
+# Since Python 3.13, venv creates a .gitignore file in the venv directory,
+# which would overwrite our own .gitignore, so we turn that off.
+VENV_OPTIONS=$(shell $(PYTHON) -c "import sys; print('--without-scm-ignore-files' if sys.version_info >= (3, 13) else '')")
 
 
 # Add the following 'help' target to your Makefile
@@ -88,7 +92,7 @@ clean-test: ## remove test and coverage artifacts
 
 bin/pip:
 	@echo "$(GREEN)==> Setup Virtual Env$(RESET)"
-	$(PYTHON) -m venv .
+	$(PYTHON) -m venv $(VENV_OPTIONS) .
 	bin/pip install -U "pip" "wheel" "cookiecutter" "mxdev"
 
 .PHONY: config

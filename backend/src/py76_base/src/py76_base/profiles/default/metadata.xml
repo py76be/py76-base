@@ -2,7 +2,7 @@
 <metadata>
   <version>20240222001</version>
   <dependencies>
-    <dependency>profile-plone.volto:default</dependency>
+    <dependency>profile-plone.volto:initial</dependency>
     <dependency>plone.app.caching:default</dependency>
     <dependency>plone.app.caching:with-caching-proxy</dependency>
     <dependency>collective.volto.formsupport:default</dependency>

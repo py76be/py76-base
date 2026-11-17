@@ -8,7 +8,6 @@ from plone.namedfile.file import NamedBlobImage
 import json
 import os
 
-
 TO_DELETE = ("front-page", "news", "events", "Members")
 
 __location__ = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))

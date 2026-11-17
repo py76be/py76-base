@@ -1,0 +1,47 @@
+{
+  "name": "volto-py76-base",
+  "version": "0.1.0",
+  "description": "volto-py76-base: Volto add-on",
+  "main": "src/index.js",
+  "license": "MIT",
+  "keywords": [
+    "volto-addon",
+    "volto",
+    "plone",
+    "react"
+  ],
+  "private": true,
+  "scripts": {
+    "i18n": "rm -rf build/messages && NODE_ENV=production i18n --addon"
+  },
+  "addons": [
+    "@eeacms/volto-accordion-block",
+    "@kitconcept/volto-slider-block",
+    "@eeacms/volto-matomo",
+    "volto-subblocks",
+    "volto-form-block"
+  ],
+  "theme": "",
+  "dependencies": {
+    "@eeacms/volto-accordion-block": "13.1.1",
+    "@eeacms/volto-matomo": "7.0.1",
+    "@kitconcept/volto-slider-block": "7.1.0",
+    "volto-form-block": "3.7.2",
+    "volto-subblocks": "2.1.1"
+  },
+  "peerDependencies": {
+    "@plone/volto": "^19.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@plone/registry": "workspace:*",
+    "@plone/scripts": "workspace:*",
+    "@plone/types": "workspace:*",
+    "@testing-library/react": "^16.2.0",
+    "@types/react": "^18.3.1",
+    "@types/react-dom": "^18.3.1",
+    "typescript": "^5.7.3",
+    "vitest": "^3.1.2"
+  }
+}

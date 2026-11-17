@@ -2,6 +2,20 @@
 ## 1.0.1 (unreleased)
 
 
+- Update frontend to Volto 19.7.1.
+  The frontend is now a pnpm workspace with the Cookieplone layout:
+  the add-on lives in `frontend/packages/volto-py76-base`,
+  and Volto core is checked out in `frontend/core` by `mrs-developer`.
+  Node 22 or 24 and pnpm are required, yarn is no longer used.
+  Unit tests run with Vitest.
+  Update the add-ons for Volto 19: `@eeacms/volto-accordion-block` 13.1.1,
+  `@eeacms/volto-matomo` 7.0.1, `@kitconcept/volto-slider-block` 7.1.0,
+  and `volto-subblocks` 2.1.1.
+  Keep `volto-form-block` at 3.7.2, matching `collective.volto.formsupport` 2.7.0.
+  Override `chalk` to version 4 for `@plone/babel-preset-razzle`:
+  with chalk 5 the development server crashes on files with an anonymous
+  default export, like in `volto-form-block`.
+
 - Update backend to Plone 6.2.3.
   Python 3.11 or higher is now required.
   Use `zope.pytestlayer` instead of the deprecated `gocept.pytestlayer`.

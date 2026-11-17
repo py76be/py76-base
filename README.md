@@ -14,8 +14,8 @@ A base project for Plone 6 from Py76
 Ensure you have the following installed:
 
 - Python 3.13 🐍
-- Node 18 🟩
-- yarn 🧶
+- Node 22 or 24 🟩
+- pnpm 10 (enable it with `corepack enable pnpm`) 📦
 - Docker 🐳
 
 ### Installation 🔧

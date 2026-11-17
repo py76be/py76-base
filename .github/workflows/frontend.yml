@@ -10,7 +10,7 @@ on:
 env:
   IMAGE_NAME_PREFIX: ghcr.io/py76be/py76-base
   IMAGE_NAME_SUFFIX: frontend
-  NODE_VERSION: 18.x
+  NODE_VERSION: 22.x
 
 defaults:
   run:
@@ -22,31 +22,37 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout codebase
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Update Global Yarn
-        run: |
-          corepack enable
-          corepack prepare yarn@stable --activate
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: frontend/package.json
 
-      - name: Use Node.js ${{ env.node-version }}
-        uses: actions/setup-node@v3
+      - name: Use Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'yarn'
-          cache-dependency-path: 'frontend/yarn.lock'
-
-      - name: Prettier
-        id: prettier
-        run: npx prettier@3.0.3 --single-quote --check 'src/**/*.{js,jsx,ts,tsx,css,scss}' --config=package.json
+          cache: 'pnpm'
+          cache-dependency-path: 'frontend/pnpm-lock.yaml'
 
       - name: Install packages
         run: make install
 
+      - name: Prettier
+        id: prettier
+        if: ${{ success() || failure() }}
+        run: pnpm prettier
+
       - name: ESLint
         id: eslint
         if: ${{ success() || failure() }}
-        run: yarn run lint:ci
+        run: pnpm lint
+
+      - name: Stylelint
+        id: stylelint
+        if: ${{ success() || failure() }}
+        run: pnpm stylelint
 
       - name: i18n sync
         id: i18n
@@ -56,7 +62,7 @@ jobs:
       - name: Unit Tests
         id: unit
         if: ${{ success() || failure() }}
-        run: make test
+        run: make ci-test
 
       - name: Report
         if: ${{ success() || failure() }}
@@ -66,8 +72,9 @@ jobs:
           echo '| --- | --- |' >> $GITHUB_STEP_SUMMARY
           echo '| Prettier | ${{ steps.prettier.conclusion == 'failure' && '❌' || ' ✅' }} |' >> $GITHUB_STEP_SUMMARY
           echo '| ESLint | ${{ steps.eslint.conclusion == 'failure' && '❌' || ' ✅' }} |' >> $GITHUB_STEP_SUMMARY
+          echo '| Stylelint | ${{ steps.stylelint.conclusion == 'failure' && '❌' || ' ✅' }} |' >> $GITHUB_STEP_SUMMARY
           echo '| i18n | ${{ steps.i18n.conclusion == 'failure' && '❌' || ' ✅' }} |' >> $GITHUB_STEP_SUMMARY
-          echo '| Unit Tests | ${{ steps.unit.conclusion == 'failure' && '❌' || ' ✅' }} |' >> $GITHUB_STEP_SUMMARY 
+          echo '| Unit Tests | ${{ steps.unit.conclusion == 'failure' && '❌' || ' ✅' }} |' >> $GITHUB_STEP_SUMMARY
 
 
   release:

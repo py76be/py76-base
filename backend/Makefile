@@ -32,7 +32,9 @@ IMAGE_NAME=ghcr.io/py76be/py76-base-backend
 IMAGE_TAG=latest
 
 # Python checks
-PYTHON?=python3
+# Default to Python 3.13 to match the Python from the upstream
+# plone/server-builder Docker image.
+PYTHON?=python3.13
 
 # installed?
 ifeq (, $(shell which $(PYTHON) ))
@@ -40,10 +42,10 @@ ifeq (, $(shell which $(PYTHON) ))
 endif
 
 # version ok?
-PYTHON_VERSION_MIN=3.8
+PYTHON_VERSION_MIN=3.10
 PYTHON_VERSION_OK=$(shell $(PYTHON) -c "import sys; print((int(sys.version_info[0]), int(sys.version_info[1])) >= tuple(map(int, '$(PYTHON_VERSION_MIN)'.split('.'))))")
 ifeq ($(PYTHON_VERSION_OK),0)
-  $(error "Need python $(PYTHON_VERSION) >= $(PYTHON_VERSION_MIN)")
+  $(error "Need python >= $(PYTHON_VERSION_MIN)")
 endif
 
 

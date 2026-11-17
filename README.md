@@ -13,7 +13,7 @@ A base project for Plone 6 from Py76
 
 Ensure you have the following installed:
 
-- Python 3.11 🐍
+- Python 3.13 🐍
 - Node 18 🟩
 - yarn 🧶
 - Docker 🐳
